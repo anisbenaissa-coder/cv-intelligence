@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Intelligence — Analyse IA de CV</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #1e1e2e;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --success: #4ade80;
+    --warning: #fbbf24;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Noise texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* Gradient blob */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 600px;
+    background: radial-gradient(ellipse, rgba(108,99,255,0.12) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .nav-badge {
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.3);
+    color: var(--accent);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+  }
+
+  .hero {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 80px 20px 60px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .tag {
+    display: inline-block;
+    background: rgba(108,99,255,0.1);
+    border: 1px solid rgba(108,99,255,0.25);
+    color: var(--accent);
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    margin-bottom: 24px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 6vw, 60px);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    letter-spacing: -0.02em;
+  }
+
+  h1 .gradient {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    color: var(--muted);
+    font-size: 18px;
+    font-weight: 300;
+    max-width: 500px;
+    margin: 0 auto 40px;
+  }
+
+  /* Upload Zone */
+  .upload-card {
+    position: relative;
+    z-index: 10;
+    max-width: 560px;
+    margin: 0 auto 80px;
+    padding: 0 20px;
+  }
+
+  .upload-zone {
+    background: var(--surface);
+    border: 2px dashed var(--border);
+    border-radius: 20px;
+    padding: 50px 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .upload-zone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(108,99,255,0.06) 0%, transparent 60%);
+  }
+
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.05);
+    transform: translateY(-2px);
+  }
+
+  .upload-icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(108,99,255,0.15);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 26px;
+  }
+
+  .upload-zone h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .upload-zone p {
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .upload-zone input[type="file"] {
+    display: none;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    margin-top: 20px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .file-selected {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    background: rgba(74,222,128,0.08);
+    border: 1px solid rgba(74,222,128,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--success);
+  }
+
+  .file-selected.show { display: flex; }
+
+  /* Loading */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 30px;
+  }
+
+  .loading.show { display: block; }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Results */
+  .results {
+    display: none;
+    max-width: 680px;
+    margin: 0 auto 80px;
+    padding: 0 20px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .results.show { display: block; }
+
+  .score-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .score-circle {
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
+  }
+
+  .score-circle svg { transform: rotate(-90deg); }
+
+  .score-number {
+    position: relative;
+    text-align: center;
+    margin-top: -100px;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score-number span {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+  }
+
+  .score-number small {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .score-info h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .niveau-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .niveau-Junior { background: rgba(251,191,36,0.15); color: #fbbf24; }
+  .niveau-Confirmé { background: rgba(74,222,128,0.15); color: #4ade80; }
+  .niveau-Senior { background: rgba(108,99,255,0.15); color: #6c63ff; }
+  .niveau-Expert { background: rgba(255,101,132,0.15); color: #ff6584; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 12px;
+  }
+
+  .card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .card ul { list-style: none; }
+
+  .card ul li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 15px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card ul li:last-child { border-bottom: none; }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-top: 8px;
+    flex-shrink: 0;
+  }
+
+  .dot-green { background: var(--success); }
+  .dot-orange { background: var(--warning); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .metier-tag {
+    background: rgba(108,99,255,0.08);
+    border: 1px solid rgba(108,99,255,0.2);
+    color: var(--accent);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .conseil-box {
+    background: rgba(255,101,132,0.06);
+    border: 1px solid rgba(255,101,132,0.2);
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 14px;
+    color: #ff9ab0;
+    margin-top: 4px;
+    line-height: 1.6;
+  }
+
+  .btn-reset {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .btn-reset:hover { border-color: var(--text); color: var(--text); }
+
+  /* Pricing */
+  .pricing {
+    position: relative;
+    z-index: 10;
+    max-width: 680px;
+    margin: 0 auto 80px;
+    padding: 0 20px;
+  }
+
+  .pricing h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .pricing > p {
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+
+  .plans {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .plan {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .plan.featured {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.07);
+  }
+
+  .plan .plan-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .plan .plan-price {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .plan .plan-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .plan ul { list-style: none; font-size: 13px; text-align: left; }
+  .plan ul li { padding: 4px 0; color: var(--muted); }
+  .plan ul li::before { content: '✓ '; color: var(--success); }
+
+  /* Error */
+  .error-box {
+    display: none;
+    background: rgba(255,101,132,0.08);
+    border: 1px solid rgba(255,101,132,0.25);
+    border-radius: 12px;
+    padding: 14px 18px;
+    color: #ff9ab0;
+    font-size: 14px;
+    margin-top: 12px;
+  }
+  .error-box.show { display: block; }
+
+  @media (max-width: 600px) {
+    nav { padding: 16px 20px; }
+    .grid2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">CV<span>IQ</span></a>
+  <span class="nav-badge">✦ 1 mois gratuit</span>
+</nav>
+
+<section class="hero">
+  <div class="tag">Analyse IA instantanée</div>
+  <h1>Ton CV analysé par <span class="gradient">l'IA en 10 secondes</span></h1>
+  <p>Score détaillé, points forts, conseils RH — conçu pour les recruteurs et candidats.</p>
+</section>
+
+<div class="upload-card" id="upload-section">
+  <div class="upload-zone" id="drop-zone" onclick="document.getElementById('cv-file').click()">
+    <div class="upload-icon">📄</div>
+    <h3>Dépose ton CV ici</h3>
+    <p>ou clique pour choisir un fichier PDF</p>
+    <input type="file" id="cv-file" accept=".pdf" onchange="handleFile(this.files[0])">
+  </div>
+  <div class="file-selected" id="file-selected">
+    <span>✓</span>
+    <span id="file-name"></span>
+  </div>
+  <div class="error-box" id="error-box"></div>
+  <button class="btn" id="analyze-btn" onclick="analyzeCV()" disabled>
+    Analyser mon CV →
+  </button>
+</div>
+
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <p style="color:var(--muted)">Analyse en cours par l'IA...</p>
+</div>
+
+<div class="results" id="results">
+  <div class="score-card">
+    <div>
+      <div class="score-circle">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="#1e1e2e" stroke-width="8"/>
+          <circle cx="50" cy="50" r="40" fill="none" stroke="var(--accent)" stroke-width="8"
+            stroke-linecap="round" stroke-dasharray="251.2" id="score-arc" stroke-dashoffset="251.2"/>
+        </svg>
+      </div>
+      <div class="score-number">
+        <span id="score-val">—</span>
+        <small>score</small>
+      </div>
+    </div>
+    <div class="score-info">
+      <span class="niveau-badge" id="niveau-badge"></span>
+      <h2 id="resume-text"></h2>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>✦ Points forts</h3>
+      <ul id="points-forts"></ul>
+    </div>
+    <div class="card">
+      <h3>△ À améliorer</h3>
+      <ul id="points-amelioration"></ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Métiers compatibles</h3>
+    <div id="metiers" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+  </div>
+
+  <div class="card">
+    <h3>Conseil RH</h3>
+    <div class="conseil-box" id="conseil-rh"></div>
+  </div>
+
+  <button class="btn btn-reset" onclick="resetApp()">← Analyser un autre CV</button>
+</div>
+
+<!-- Pricing -->
+<section class="pricing">
+  <h2>Tarifs transparents</h2>
+  <p>Commence gratuitement, paie seulement quand tu en as besoin.</p>
+  <div class="plans">
+    <div class="plan">
+      <div class="plan-name">Gratuit</div>
+      <div class="plan-price">0€</div>
+      <div class="plan-desc">Pour tester</div>
+      <ul>
+        <li>1 mois complet offert</li>
+        <li>Puis 1 CV / 24h</li>
+        <li>Analyse complète</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">15€</div>
+      <div class="plan-desc">500 crédits CV</div>
+      <ul>
+        <li>500 analyses</li>
+        <li>Sans expiration</li>
+        <li>Support prioritaire</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Entreprise</div>
+      <div class="plan-price">Sur devis</div>
+      <div class="plan-desc">Volume illimité</div>
+      <ul>
+        <li>API dédiée</li>
+        <li>Intégration ATS</li>
+        <li>SLA garanti</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<script>
+  // ⚠️ REMPLACE cette URL par l'URL de ton backend Render après déploiement
+  const API_URL = "https://TON-APP.onrender.com";
+
+  let selectedFile = null;
+
+  function handleFile(file) {
+    if (!file) return;
+    selectedFile = file;
+    document.getElementById('file-name').textContent = file.name;
+    document.getElementById('file-selected').classList.add('show');
+    document.getElementById('analyze-btn').disabled = false;
+    document.getElementById('error-box').classList.remove('show');
+  }
+
+  // Drag & Drop
+  const dropZone = document.getElementById('drop-zone');
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.name.endsWith('.pdf')) handleFile(file);
+  });
+
+  async function analyzeCV() {
+    if (!selectedFile) return;
+    document.getElementById('upload-section').style.display = 'none';
+    document.getElementById('loading').classList.add('show');
+    document.getElementById('results').classList.remove('show');
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    try {
+      const res = await fetch(`${API_URL}/analyze`, { method: 'POST', body: formData });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || 'Erreur serveur');
+      }
+
+      showResults(data);
+    } catch (err) {
+      document.getElementById('upload-section').style.display = 'block';
+      document.getElementById('error-box').textContent = err.message;
+      document.getElementById('error-box').classList.add('show');
+    } finally {
+      document.getElementById('loading').classList.remove('show');
+    }
+  }
+
+  function showResults(data) {
+    document.getElementById('score-val').textContent = data.score;
+    const offset = 251.2 - (251.2 * data.score / 100);
+    document.getElementById('score-arc').style.strokeDashoffset = offset;
+    document.getElementById('score-arc').style.stroke =
+      data.score >= 70 ? 'var(--success)' : data.score >= 45 ? 'var(--warning)' : 'var(--accent2)';
+
+    const badge = document.getElementById('niveau-badge');
+    badge.textContent = data.niveau;
+    badge.className = `niveau-badge niveau-${data.niveau}`;
+
+    document.getElementById('resume-text').textContent = data.resume;
+
+    const forts = document.getElementById('points-forts');
+    forts.innerHTML = data.points_forts.map(p =>
+      `<li><span class="dot dot-green"></span>${p}</li>`).join('');
+
+    const amelio = document.getElementById('points-amelioration');
+    amelio.innerHTML = data.points_amelioration.map(p =>
+      `<li><span class="dot dot-orange"></span>${p}</li>`).join('');
+
+    const metiers = document.getElementById('metiers');
+    metiers.innerHTML = data.metiers_compatibles.map(m =>
+      `<span class="metier-tag">${m}</span>`).join('');
+
+    document.getElementById('conseil-rh').textContent = data.conseil_rh;
+    document.getElementById('results').classList.add('show');
+  }
+
+  function resetApp() {
+    selectedFile = null;
+    document.getElementById('file-selected').classList.remove('show');
+    document.getElementById('analyze-btn').disabled = true;
+    document.getElementById('cv-file').value = '';
+    document.getElementById('results').classList.remove('show');
+    document.getElementById('upload-section').style.display = 'block';
+  }
+</script>
+</body>
+</html>
